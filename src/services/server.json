@@ -374,7 +374,38 @@
       "id": "59626707-88c5-4877-9350-07f372c0905a",
       "unavailable_dates": [
         "2021-06-28",
-        "2021-06-29"
+        "2021-06-29",
+        "2022-03-01",
+        "2022-03-02",
+        "2022-03-03",
+        "2022-03-04",
+        "2022-03-05",
+        "2022-03-06",
+        "2022-03-07",
+        "2022-03-08",
+        "2022-03-09",
+        "2022-03-10",
+        "2022-03-11",
+        "2022-03-12",
+        "2022-03-13",
+        "2022-03-14",
+        "2022-03-15",
+        "2022-03-16",
+        "2022-03-17",
+        "2022-03-18",
+        "2022-03-19",
+        "2022-03-20",
+        "2022-03-21",
+        "2022-03-22",
+        "2022-03-23",
+        "2022-03-24",
+        "2022-03-25",
+        "2022-03-26",
+        "2022-03-27",
+        "2022-03-28",
+        "2022-03-29",
+        "2022-03-30",
+        "2022-03-31"
       ]
     }
   ],
@@ -427,6 +458,55 @@
       "startDate": "23/02/2022",
       "endDate": "28/02/2022",
       "id": 1
+    },
+    {
+      "user_id": 1,
+      "car": {
+        "id": "59626707-88c5-4877-9350-07f372c0905a",
+        "brand": "mitsubishi",
+        "name": "Lancer",
+        "about": "Mitsubishi Lancer é um belo e agressivo carro. Além do mais, ele encanta pelo conforto e pela eficiência. Bastante firme e estável para dirigir com tranquilidade e segurança.",
+        "rent": {
+          "period": "Ao dia",
+          "price": 220
+        },
+        "fuel_type": "hybrid_motor",
+        "thumbnail": "https://storage.googleapis.com/golden-wind/ignite/react-native/thumbnails/6.png",
+        "accessories": [
+          {
+            "type": "speed",
+            "name": "180km/h"
+          },
+          {
+            "type": "acceleration",
+            "name": "2.0s"
+          },
+          {
+            "type": "turning_diameter",
+            "name": "600 HP"
+          },
+          {
+            "type": "hybrid_motor",
+            "name": "Híbrido"
+          },
+          {
+            "type": "exchange",
+            "name": "Auto"
+          },
+          {
+            "type": "seats",
+            "name": "5 pessoas"
+          }
+        ],
+        "photos": [
+          "https://storage.googleapis.com/golden-wind/ignite/react-native/images/15.png",
+          "https://storage.googleapis.com/golden-wind/ignite/react-native/images/16.png",
+          "https://storage.googleapis.com/golden-wind/ignite/react-native/images/17.png"
+        ]
+      },
+      "startDate": "01/03/2022",
+      "endDate": "31/03/2022",
+      "id": 2
     }
   ]
 }
