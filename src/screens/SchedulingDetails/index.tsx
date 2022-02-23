@@ -13,6 +13,8 @@ import { BackButton } from "../../components/BackButton";
 import { ImageSlider } from "../../components/ImageSlider";
 import { Accessory } from "../../components/Accessory";
 import { Button } from "../../components/Button";
+import { Load } from "../../components/Load";
+
 import { getAccessoryIcon } from "../../utils/getAccessoryIcon";
 
 import { CarDTO } from "../../dtos/CarDTO";
@@ -55,6 +57,7 @@ interface RentalPeriod {
 }
 
 export function SchedulingDetails() {
+  const [loading, setLoading] = useState(false);
   const [rentalPeriod, setRentalPeriod] = useState<RentalPeriod>(
     {} as RentalPeriod
   );
@@ -75,7 +78,16 @@ export function SchedulingDetails() {
       ...shedulesByCar.data.unavailable_dates,
       ...dates,
     ];
-    console.log(car.id);
+
+    await api.post("/schedules_byuser", {
+      user_id: 1,
+      car,
+      startDate: format(getPlatformDate(new Date(dates[0])), "dd/MM/yyyy"),
+      endDate: format(
+        getPlatformDate(new Date(dates[dates.length - 1])),
+        "dd/MM/yyyy"
+      ),
+    });
 
     api
       .put(`/schedules_bycars/${car.id}`, {
