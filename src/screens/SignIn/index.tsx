@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import {
-  StatusBar,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from "react-native";
+import { Alert } from "react-native";
+import * as Yup from "yup";
+import { StatusBar, KeyboardAvoidingView, Keyboard } from "react-native";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+
+import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "styled-components";
 
 import { Button } from "../../components/Button";
@@ -15,9 +15,35 @@ import { Container, Header, Title, SubTitle, Form, Footer } from "./styles";
 
 export function SignIn() {
   const theme = useTheme();
+  const navigate = useNavigation<any>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  function handleNewAccount() {
+    navigate.navigate("SignUpFirstStep");
+  }
+
+  async function handleSignIn() {
+    const schema = Yup.object().shape({
+      email: Yup.string()
+        .email("Digite um e-mail válido.")
+        .required("E-mail obrigatório"),
+      password: Yup.string().required("A senha é obrigatória"),
+    });
+    try {
+      await schema.validate({ email, password });
+
+      Alert.alert("Cadastro feito com sucesso!");
+    } catch (erro) {
+      if (erro instanceof Yup.ValidationError) {
+        Alert.alert(erro.message);
+      } else {
+        const message = (erro as Error).message;
+        Alert.alert(message);
+      }
+    }
+  }
 
   return (
     <KeyboardAvoidingView behavior="position" enabled>
@@ -58,14 +84,17 @@ export function SignIn() {
           <Footer>
             <Button
               title="Login"
-              onPress={() => {}}
-              enabled={false}
+              onPress={() => {
+                handleSignIn();
+              }}
+              enabled={true}
               loading={false}
             />
             <Button
               title="Criar conta gratuita"
-              onPress={() => {}}
               loading={false}
+              enabled={true}
+              onPress={handleNewAccount}
               light
               color={theme.colors.background_primary}
             />
