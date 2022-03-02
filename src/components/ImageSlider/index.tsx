@@ -6,7 +6,10 @@ import { Bullet } from "../Bullet";
 import { Container, ImageIndexes, CarImageWrapper, CarImage } from "./styles";
 
 interface Props {
-  imagesUrl: string[];
+  imagesUrl: {
+    id: string;
+    photo: string;
+  }[];
 }
 
 interface ChangeImageProps {
@@ -25,8 +28,8 @@ export function ImageSlider({ imagesUrl }: Props) {
   return (
     <Container>
       <ImageIndexes>
-        {imagesUrl.map((_, index) => (
-          <Bullet key={String(index)} active={index === imageIndex} />
+        {imagesUrl.map((item, index) => (
+          <Bullet key={item.id} active={index === imageIndex} />
         ))}
       </ImageIndexes>
 
@@ -35,10 +38,10 @@ export function ImageSlider({ imagesUrl }: Props) {
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={indexChanged.current}
         data={imagesUrl}
-        keyExtractor={(key) => key}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CarImageWrapper>
-            <CarImage source={{ uri: item }} resizeMode="contain" />
+            <CarImage source={{ uri: item.photo }} resizeMode="contain" />
           </CarImageWrapper>
         )}
       />

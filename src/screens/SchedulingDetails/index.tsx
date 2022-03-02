@@ -73,8 +73,6 @@ export function SchedulingDetails() {
     setLoading(true);
     const shedulesByCar = await api.get(`/schedules_bycars/${car.id}`);
 
-    console.log("Priquita cabeluda passo aqui?🚀");
-
     const unavailable_dates = [
       ...shedulesByCar.data.unavailable_dates,
       ...dates,
@@ -95,7 +93,14 @@ export function SchedulingDetails() {
         id: car.id,
         unavailable_dates,
       })
-      .then(() => navigation.navigate("SchedulingComplete"))
+      .then(() =>
+        navigation.navigate("Confirmation", {
+          nextScreenRoute: "Home",
+          title: "Carro alugado",
+          message:
+            "Agora você só precisa ir\n até a concessionária da RENTX\n pegar o seu automóvel.",
+        })
+      )
       .catch(() => {
         setLoading(false);
         Alert.alert("Não foi possível confirma o agendamento.");

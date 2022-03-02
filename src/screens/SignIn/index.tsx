@@ -6,6 +6,7 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "styled-components";
+import { useAuth } from "../../hooks/auth";
 
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
@@ -19,22 +20,24 @@ export function SignIn() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { signIn } = useAuth();
 
   function handleNewAccount() {
     navigate.navigate("SignUpFirstStep");
   }
 
   async function handleSignIn() {
-    const schema = Yup.object().shape({
-      email: Yup.string()
-        .email("Digite um e-mail válido.")
-        .required("E-mail obrigatório"),
-      password: Yup.string().required("A senha é obrigatória"),
-    });
     try {
+      const schema = Yup.object().shape({
+        email: Yup.string()
+          .email("Digite um e-mail válido.")
+          .required("E-mail obrigatório"),
+        password: Yup.string().required("A senha é obrigatória"),
+      });
+
       await schema.validate({ email, password });
 
-      Alert.alert("Cadastro feito com sucesso!");
+      await signIn({ email, password });
     } catch (erro) {
       if (erro instanceof Yup.ValidationError) {
         Alert.alert(erro.message);

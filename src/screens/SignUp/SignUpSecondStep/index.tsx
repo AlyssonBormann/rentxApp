@@ -5,6 +5,8 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useTheme } from "styled-components";
 
+import { api } from "../../../services/api";
+
 import { Bullet } from "../../../components/Bullet";
 import { BackButton } from "../../../components/BackButton";
 import { Button } from "../../../components/Button";
@@ -24,19 +26,39 @@ export function SignUpSecondStep() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const theme = useTheme();
   const route = useRoute();
 
   const { user } = route.params as Params;
 
-  function handleRegister() {
+  async function handleRegister() {
     if (!password || !passwordConfirm) {
       return Alert.alert("Informe a senha e a confirmação.");
     }
     if (password != passwordConfirm) {
       return Alert.alert("As senhas não são iguais.");
     }
+
+    await api
+      .post("/users", {
+        name: user.name,
+        email: user.email,
+        driver_license: user.driverLicense,
+        password,
+      })
+      .then(() => {
+        Alert.alert("Cadastrar efetuado com sucesso.");
+
+        navigation.navigate("Confirmation", {
+          title: "Conta criada!",
+          message: `Agora é só fazer login\n e aproveitar.`,
+          nextScreenRoute: "SignIn",
+        });
+      })
+      .catch(() => {
+        Alert.alert("Não foi possível cadastrar");
+      });
   }
 
   function handleBlack() {
