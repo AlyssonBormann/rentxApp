@@ -22,7 +22,7 @@ export const Header = styled.View`
 
 export const HeaderTop = styled.View`
   width: 100%;
-
+  padding: 0 24px;
   margin-top: ${getStatusBarHeight() + 32}px;
 
   flex-direction: row;

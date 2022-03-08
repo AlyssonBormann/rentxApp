@@ -4,6 +4,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { Feather } from "@expo/vector-icons";
 import { format } from "date-fns/esm";
 
+import { useNetInfo } from "@react-native-community/netinfo";
 import { useTheme } from "styled-components";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -57,45 +58,35 @@ interface RentalPeriod {
 }
 
 export function SchedulingDetails() {
+  const [carUpdated, setCarUpdated] = useState<CarDTO>({} as CarDTO);
   const [loading, setLoading] = useState(false);
   const [rentalPeriod, setRentalPeriod] = useState<RentalPeriod>(
     {} as RentalPeriod
   );
+
+  const netInfo = useNetInfo();
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const route = useRoute();
 
   const { car, dates } = route.params as Params;
 
-  const rentTotal = Number(dates.length * car.rent.price);
+  const rentTotal = Number(dates.length * car.price);
 
   async function handleConfirmRental() {
     setLoading(true);
-    const shedulesByCar = await api.get(`/schedules_bycars/${car.id}`);
 
-    const unavailable_dates = [
-      ...shedulesByCar.data.unavailable_dates,
-      ...dates,
-    ];
-
-    await api.post("/schedules_byuser", {
-      user_id: 1,
-      car,
-      startDate: format(getPlatformDate(new Date(dates[0])), "dd/MM/yyyy"),
-      endDate: format(
-        getPlatformDate(new Date(dates[dates.length - 1])),
-        "dd/MM/yyyy"
-      ),
-    });
-
-    api
-      .put(`/schedules_bycars/${car.id}`, {
-        id: car.id,
-        unavailable_dates,
+    await api
+      .post("/rentals", {
+        user_id: 1,
+        car_id: car.id,
+        start_date: new Date(dates[0]),
+        end_date: new Date(dates[dates.length - 1]),
+        total: rentTotal,
       })
       .then(() =>
         navigation.navigate("Confirmation", {
-          nextScreenRoute: "Home",
+          nextScreenRoute: "MyCars",
           title: "Carro alugado",
           message:
             "Agora você só precisa ir\n até a concessionária da RENTX\n pegar o seu automóvel.",
@@ -121,13 +112,31 @@ export function SchedulingDetails() {
     });
   }, []);
 
+  useEffect(() => {
+    async function fetchCarUpdated() {
+      const response = await api.get(`/cars/${car.id}`);
+
+      setCarUpdated(response.data);
+    }
+
+    if (netInfo.isConnected === true) {
+      fetchCarUpdated();
+    }
+  }, [netInfo.isConnected]);
+
   return (
     <Container>
       <Header>
         <BackButton onPress={handleBack} />
       </Header>
       <CarImages>
-        <ImageSlider imagesUrl={car.photos} />
+        <ImageSlider
+          imagesUrl={
+            !!carUpdated.photos
+              ? carUpdated.photos
+              : [{ id: car.thumbnail, photo: car.thumbnail }]
+          }
+        />
       </CarImages>
       <Content>
         <Details>
@@ -136,19 +145,21 @@ export function SchedulingDetails() {
             <Name>{car.name}</Name>
           </Description>
           <Rent>
-            <Period>{car.rent.period}</Period>
-            <Price>R$ {car.rent.price}</Price>
+            <Period>{car.period}</Period>
+            <Price>R$ {netInfo.isConnected === true ? car.price : "..."}</Price>
           </Rent>
         </Details>
-        <Accessories>
-          {car.accessories.map((accessorie) => (
-            <Accessory
-              key={accessorie.type}
-              name={accessorie.name}
-              icon={getAccessoryIcon(accessorie.type)}
-            />
-          ))}
-        </Accessories>
+        {carUpdated.accessories && (
+          <Accessories>
+            {carUpdated.accessories.map((accessories) => (
+              <Accessory
+                key={accessories.type}
+                name={accessories.name}
+                icon={getAccessoryIcon(accessories.type)}
+              />
+            ))}
+          </Accessories>
+        )}
         <RentalPeriod>
           <CalendarIcon>
             <Feather
@@ -175,8 +186,14 @@ export function SchedulingDetails() {
         <RentalPrice>
           <RentalPriceLabel>Total</RentalPriceLabel>
           <RentalPriceDetails>
-            <RentalPriceQuota>{`R$ ${car.rent.price} x${dates.length} diárias`}</RentalPriceQuota>
-            <RentalPriceTotal>R$ {rentTotal}</RentalPriceTotal>
+            <RentalPriceQuota>
+              {netInfo.isConnected === true
+                ? `R$ ${car.price} x${dates.length} diárias`
+                : "..."}
+            </RentalPriceQuota>
+            <RentalPriceTotal>
+              R$ {netInfo.isConnected === true ? `${rentTotal}` : "..."}
+            </RentalPriceTotal>
           </RentalPriceDetails>
         </RentalPrice>
       </Content>

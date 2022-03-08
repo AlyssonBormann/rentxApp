@@ -29,6 +29,8 @@ interface AuthContextData {
   user: User;
   signIn: (credentials: SignInCredentials) => Promise<void>;
   signOut: () => Promise<void>;
+  updatedUser: (user: User) => Promise<void>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -39,6 +41,7 @@ interface AuthProviderProps {
 
 function AuthProvider({ children }: AuthProviderProps) {
   const [data, setData] = useState<User>({} as User);
+  const [loading, setLoading] = useState(true);
 
   async function signOut() {
     try {
@@ -86,6 +89,26 @@ function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
+  async function updatedUser(user: User) {
+    try {
+      const userCollection = database.get<ModelUser>("users");
+      await database.write(async () => {
+        const userSelected = await userCollection.find(user.id);
+
+        await userSelected.update((userData) => {
+          (userData.name = user.name),
+            (userData.driver_license = user.driver_license),
+            (userData.avatar = user.avatar),
+            (userData.token = user.token);
+        });
+
+        setData(user);
+      });
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
+
   useEffect(() => {
     async function loadUserData() {
       const userColletion = await database.get<ModelUser>("users");
@@ -99,13 +122,16 @@ function AuthProvider({ children }: AuthProviderProps) {
         ] = `Bearer ${userData.token}`;
 
         setData(userData);
+        setLoading(false);
       }
     }
     loadUserData();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user: data, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user: data, signIn, signOut, updatedUser, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

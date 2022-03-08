@@ -38,11 +38,11 @@ export function SignIn() {
       await schema.validate({ email, password });
 
       await signIn({ email, password });
-    } catch (erro) {
-      if (erro instanceof Yup.ValidationError) {
-        Alert.alert(erro.message);
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        Alert.alert(error.message);
       } else {
-        const message = (erro as Error).message;
+        const message = (error as Error).message;
         Alert.alert(message);
       }
     }

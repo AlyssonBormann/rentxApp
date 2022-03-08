@@ -1,6 +1,7 @@
 import "react-native-gesture-handler";
 import React from "react";
 import AppLoading from "expo-app-loading";
+import { LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeProvider } from "styled-components";
 import { AppProvider } from "./src/hooks";
@@ -33,6 +34,10 @@ export default function App() {
   if (!fontsLoaded) {
     return <AppLoading />;
   }
+
+  LogBox.ignoreLogs([
+    "Non-serializable values were found in the navigation state",
+  ]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

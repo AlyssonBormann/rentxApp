@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Feather } from "@expo/vector-icons";
-import { KeyboardAvoidingView, Keyboard } from "react-native";
+import { KeyboardAvoidingView, Keyboard, Alert } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
+import * as Yup from "yup";
 
+import { useNetInfo } from "@react-native-community/netinfo";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "styled-components";
@@ -12,6 +14,7 @@ import { useAuth } from "../../hooks/auth";
 import { BackButton } from "../../components/BackButton";
 import { Input } from "../../components/Input";
 import { PasswordInput } from "../../components/PasswordInput";
+import { Button } from "../../components/Button";
 
 import {
   Container,
@@ -30,9 +33,10 @@ import {
 } from "./styles";
 
 export function Profile() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updatedUser } = useAuth();
   const theme = useTheme();
   const navigation = useNavigation();
+  const netInfo = useNetInfo();
 
   const [option, setOption] = useState<"dataEdit" | "passwordEdit">("dataEdit");
   const [name, setName] = useState(user.name);
@@ -44,7 +48,14 @@ export function Profile() {
   }
 
   function handleOptionChange(optionSelected: "dataEdit" | "passwordEdit") {
-    setOption(optionSelected);
+    if (netInfo.isConnected === false && optionSelected === "passwordEdit") {
+      Alert.alert(
+        "Você está offline",
+        "Para mudar a senha, conect-se na internet."
+      );
+    } else {
+      setOption(optionSelected);
+    }
   }
 
   async function handleAvatarSelect() {
@@ -64,6 +75,59 @@ export function Profile() {
     }
   }
 
+  async function handleProfileUpdate() {
+    try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required("Nome é obrigatório"),
+        driverLicense: Yup.string().required("CNH é obrigatória"),
+      });
+      const data = { name, driverLicense };
+
+      await schema.validate(data);
+
+      await updatedUser({
+        id: user.id,
+        user_id: user.user_id,
+        email: user.email,
+        name,
+        driver_license: driverLicense,
+        avatar,
+        token: user.token,
+      });
+
+      Alert.alert("Perfil atualizado!");
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        Alert.alert(error.message);
+      } else {
+        Alert.alert(
+          "Não foi possível atualizar o perfil",
+          (error as Error).message
+        );
+      }
+    }
+  }
+
+  async function handleSignOut() {
+    Alert.alert(
+      "Tem certeza?",
+      "Se você sair, irá precisar de internet para conectar novamente.",
+      [
+        {
+          text: "Cancelar",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "Sair",
+          onPress: () => {
+            signOut();
+          },
+        },
+      ]
+    );
+  }
+
   return (
     <KeyboardAvoidingView behavior="position" enabled>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -72,7 +136,7 @@ export function Profile() {
             <HeaderTop>
               <BackButton color={theme.colors.shape} onPress={handleBack} />
               <HeaderTitle>Editar Perfil</HeaderTitle>
-              <LogoutButton onPress={signOut}>
+              <LogoutButton onPress={handleSignOut}>
                 <Feather name="power" size={24} color={theme.colors.shape} />
               </LogoutButton>
             </HeaderTop>
@@ -134,6 +198,8 @@ export function Profile() {
                 <PasswordInput iconName="lock" placeholder="Nova senha" />
               </Section>
             )}
+
+            <Button title="Salvar alterações" onPress={handleProfileUpdate} />
           </Content>
         </Container>
       </TouchableWithoutFeedback>
